@@ -1,0 +1,23 @@
+[{
+    "conveyor_copy_task_result": "ok",
+    "channel": "telegram",
+    "chat_id": "266420745",
+    "event": "message",
+    "message": {
+        "type": "text",
+        "text": "Тест"
+    },
+    "update_id": 890461970
+},
+
+{
+    "conveyor_copy_task_result": "ok",
+    "channel": "telegram",
+    "chat_id": "266420745",
+    "event": "message",
+    "message": {
+        "type": "text",
+        "text": "Тест 2е сообщение"
+    },
+    "update_id": 890461971
+}]

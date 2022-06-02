@@ -1,0 +1,70 @@
+security:
+    # https://symfony.com/doc/current/security/experimental_authenticators.html
+    enable_authenticator_manager: true
+
+    password_hashers: 
+        Symfony\Component\Security\Core\User\User: plaintext
+
+    role_hierarchy:
+        ROLE_OPERATOR: ROLE_USER
+        ROLE_SUPERVISOR: ROLE_OPERATOR
+        ROLE_ADMIN: ROLE_USER
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        users_in_memory:
+            memory:
+                users:
+                    admin:
+                        password: "%env(resolve:ADMIN_PASSWORD)%"
+                        roles: 'ROLE_ADMIN'
+        # used to reload user from session & other features (e.g. switch_user)
+        jwt_user_provider:
+            id: App\Security\JwtUserProvider
+        ucb_user_provider:
+            id: App\Security\UcbUserProvider
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        admin:
+            pattern: ^/api
+            lazy: true
+            provider: users_in_memory
+            http_basic: ~
+        main:
+            provider: jwt_user_provider
+            custom_authenticators:
+                - App\Security\JwtAuthenticator
+                - App\Security\LoginAuthenticator
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        - { path: ^/api/active-time, roles: PUBLIC_ACCESS }
+        - { path: ^/api/dialogs, roles: PUBLIC_ACCESS }
+        - { path: ^/api/knowledge-scorings, roles: PUBLIC_ACCESS }
+        - { path: ^/users/scoring, roles: PUBLIC_ACCESS }
+        - { path: ^/users/scoring-supervisors, roles: PUBLIC_ACCESS }
+        - { path: ^/api/dialog-records/import-call, roles: PUBLIC_ACCESS }
+        - { path: ^/api/dialog-records/import-client-message, roles: PUBLIC_ACCESS }
+        - { path: ^/api/dialog-records/import-operator-message, roles: PUBLIC_ACCESS }
+        - { path: ^/api/dialog-records/import-system-message, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: ROLE_ADMIN }
+        - { path: ^/api/healthcheck, roles: PUBLIC_ACCESS }

@@ -1,0 +1,8 @@
+elao_enum:
+    # Provide the enum classes for which you want to automatically generate & register Doctrine DBAL Types:
+    # https://github.com/Elao/PhpEnums#doctrine
+    doctrine:
+        types:
+            dialog.type: { class: App\Enum\Dialog\Type }
+            dialogRecord.sender: { class: App\Enum\DialogRecord\Sender }
+            user.role: { class: App\Enum\User\Role }

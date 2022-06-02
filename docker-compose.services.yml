@@ -1,0 +1,34 @@
+version: '3.7'
+
+networks:
+  callcenter:
+    name: callcenter
+  a24:
+    name: a24
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: callcenter-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: callcenter
+      MYSQL_USER: callcenter
+      MYSQL_PASSWORD: callcenter
+    volumes:
+      - /opt/docker/callcenter/mysql:/var/lib/mysql
+    networks:
+      - callcenter
+    ports:
+      - 9402:3306
+    restart: always
+
+  redis:
+    image: redis:6-alpine
+    container_name: callcenter-redis
+    networks:
+      - callcenter
+    ports:
+      - 9403:6379
+    restart: always

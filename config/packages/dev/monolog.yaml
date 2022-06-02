@@ -1,0 +1,32 @@
+monolog:
+    handlers:
+        # Buffers only app logs and redirects to amqp and streamed file
+        main:
+            type: buffer
+            handler: grouped
+            channels: ['app', 'api', 'ucb']
+            level: debug
+            bubble: false
+        # Buffers all logs with level error or above except for channel app
+        # (in this case only for event, request, doctrine etc)
+        # Why error and above? -> event, request and doctrine channels generate excessive logs with debug, notice or
+        # warning messages.
+        default:
+            type: buffer
+            handler: grouped
+            channels: ['!app']
+            level: error
+            bubble: false
+        grouped:
+            type:    whatfailuregroup
+            members: [streamed, amqp]
+        streamed:
+            type:   stream
+            path:   "%kernel.logs_dir%/%kernel.environment%.log"
+            level: error
+            include_stacktraces: true
+        amqp:
+            type: amqp
+            exchange: logstash.exchange
+            exchange_name:
+            formatter: logstash.formatter

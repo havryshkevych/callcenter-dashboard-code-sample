@@ -1,0 +1,24 @@
+version: '3.7'
+
+networks:
+  callcenter:
+    name: callcenter
+    external: true
+  a24:
+    name: a24
+    external: true
+
+services:
+  callcenter-consumer:
+    container_name: callcenter-item-consumer
+    image: ${HUB}/php:${TAG}
+    command: bin/console messenger:consume events
+    volumes:
+      - .:/application:delegated
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - callcenter
+      - a24
+    restart: always

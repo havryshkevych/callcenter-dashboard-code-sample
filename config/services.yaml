@@ -1,0 +1,172 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    amazon.s3.key: '%env(resolve:AMAZON_S3_KEY)%'
+    amazon.s3.secret: '%env(resolve:AMAZON_S3_SECRET)%'
+    amazon.s3.bucket: '%env(resolve:AMAZON_S3_BUCKET)%'
+    amazon.s3.region: '%env(resolve:AMAZON_S3_REGION)%'
+    amazon.s3.version: '%env(resolve:AMAZON_S3_VERSION)%'
+    amazon.rekognition.version: '%env(resolve:AMAZON_REKOGNITION_VERSION)%'
+    amazon.rekognition.labels: '%env(resolve:AMAZON_REKOGNITION_LABELS)%'
+    amazon.rekognition.min_confidence: '%env(resolve:AMAZON_REKOGNITION_MIN_CONFIDENCE)%'
+    jwt.public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+    ucb.base_url: '%env(resolve:UCB_BASE_URL)%'
+    media.base_url: '%env(resolve:MEDIA_BASE_URL)%'
+    catalogue.base_url: '%env(resolve:CATALOGUE_BASE_URL)%'
+    catalogue.cache_ttl: '%env(resolve:CATALOGUE_CACHE_TTL)%'
+    monolog.amqp.host: '%env(resolve:MONOLOG_AMQP_HOST)%'
+    monolog.amqp.port: '%env(resolve:MONOLOG_AMQP_PORT)%'
+    monolog.amqp.login: '%env(resolve:MONOLOG_AMQP_LOGIN)%'
+    monolog.amqp.password: '%env(resolve:MONOLOG_AMQP_PASSWORD)%'
+    monolog.amqp.vhost: '%env(resolve:MONOLOG_AMQP_VHOST)%'
+    monolog.source: '%env(resolve:MONOLOG_SOURCE)%'
+    default_locale: '%env(resolve:APP_LOCALE)%'
+    locale_cookie: '%env(resolve:LOCALE_COOKIE)%'
+    locales: ['uk', 'ru']
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/Tests/'
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+    amazon.s3.client:
+        class: Aws\S3\S3Client
+        factory: [ Aws\S3\S3Client, factory ]
+        arguments:
+            - credentials: { key: "%amazon.s3.key%", secret: "%amazon.s3.secret%" }
+              region: "%amazon.s3.region%"
+              version: "%amazon.s3.version%"
+
+    amazon.rekognition.client:
+        class: Aws\Rekognition\RekognitionClient
+        factory: [ Aws\Rekognition\RekognitionClient, factory ]
+        arguments:
+            - credentials: { key: "%amazon.s3.key%", secret: "%amazon.s3.secret%" }
+              region: "%amazon.s3.region%"
+              version: "%amazon.rekognition.version%"
+
+    App\Service\Storage\AmazonStorage:
+        arguments:
+            - '@amazon.s3.client'
+            - '%amazon.s3.bucket%'
+
+    App\ApiPlatform\KnowledgeScoringInputDenormalizer:
+        arguments: ['%amazon.s3.bucket%']
+    App\ApiPlatform\CallInputDenormalizer:
+        arguments: ['%amazon.s3.bucket%']
+
+    App\ApiPlatform\DataProvider\UserDataProvider:
+        arguments:
+            $collectionExtensions: !tagged api_platform.doctrine.orm.query_extension.collection
+
+    App\ApiPlatform\DataProvider\SupervisorDataProvider:
+      arguments:
+        $collectionExtensions: !tagged api_platform.doctrine.orm.query_extension.collection
+
+    App\Security\JwtUserProvider:
+        arguments: ['%jwt.public_key%']
+
+    App\Service\HttpClient\UCBClient:
+        arguments: ['%ucb.base_url%']
+        calls:
+            - [setSerializer, ['@serializer']]
+            - [setLogger, ['@monolog.logger.ucb']]
+        tags:
+            - { name: monolog.logger, channel: ucb }
+
+    App\Service\HttpClient\ImageClient:
+        arguments: ['%media.base_url%']
+
+    App\Service\Monolog\SourceProcessor:
+        arguments: ['%monolog.source%']
+        tags:
+            - { name: monolog.processor }
+
+    App\Event\Listener\StopwatchListener:
+        arguments: []
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 512 }
+
+    App\Event\Listener\ApiListener:
+        arguments: ['@monolog.logger.api']
+        tags:
+            - { name: kernel.event_listener, event: kernel.terminate, method: onKernelTerminate }
+            - { name: monolog.logger, channel: api }
+
+    App\Event\Listener\DialogRecordListener:
+        tags:
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postPersist'
+              entity: 'App\Entity\DialogRecord'
+              lazy: true
+
+    App\Event\Listener\RankChangeListener:
+        tags:
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postPersist'
+              entity: 'App\Entity\Dialog'
+              lazy: true
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postUpdate'
+              entity: 'App\Entity\Dialog'
+              lazy: true
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postUpdate'
+              entity: 'App\Entity\Evaluation'
+              lazy: true
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postPersist'
+              entity: 'App\Entity\KnowledgeScoring'
+              lazy: true
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postUpdate'
+              entity: 'App\Entity\KnowledgeScoring'
+              lazy: true
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postPersist'
+              entity: 'App\Entity\ActiveTime'
+              lazy: true
+            - name: 'doctrine.orm.entity_listener'
+              event: 'postUpdate'
+              entity: 'App\Entity\ActiveTime'
+              lazy: true
+
+    App\Event\Listener\UserImageListener:
+        tags:
+            - name: 'doctrine.orm.entity_listener'
+              event: 'prePersist'
+              entity: 'App\Entity\User'
+              lazy: true
+            - name: 'doctrine.orm.entity_listener'
+              event: 'preUpdate'
+              entity: 'App\Entity\User'
+              lazy: true
+
+    logstash.exchange:
+        class: App\Service\Monolog\Logstash
+        arguments:
+            - '%monolog.amqp.host%'
+            - '%monolog.amqp.port%'
+            - '%monolog.amqp.login%'
+            - '%monolog.amqp.password%'
+            - '%monolog.amqp.vhost%'
+
+    logstash.formatter:
+        class: App\Service\Monolog\LegacyDateFormatter

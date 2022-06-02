@@ -1,0 +1,24 @@
+{
+    "conveyor_copy_task_result": "ok",
+    "attachment_id": "closeChat",
+    "channel": "viber",
+    "chatId": "b.i295066254_dmliZXI=_SkRINk1TWkUveUQxZjVOU3lrM21xUT09+i295066254",
+    "chat_id": "JDH6MSZE/yD1f5NSyk3mqQ==",
+    "class": "text",
+    "clientId": "JDH6MSZE/yD1f5NSyk3mqQ==",
+    "created": 1628249115204,
+    "devId": "X",
+    "devIp": "195.24.132.82",
+    "from": "X6cw92S4fb",
+    "linkId": 50011,
+    "model": {
+        "fromName": "Інна",
+        "fromPhoto": "",
+        "text": "Я могу сейчас его анулировать,делаем это?"
+    },
+    "operator": "Інна",
+    "packetId": 50011,
+    "procId": "",
+    "sessionId": "CHItC",
+    "text": "Інна: Я могу сейчас его анулировать,делаем это?"
+}

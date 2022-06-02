@@ -1,0 +1,75 @@
+version: '3.7'
+
+networks:
+  callcenter:
+    name: callcenter
+    external: true
+  a24:
+    name: a24
+    external: true
+
+services:
+  php:
+    image: ${HUB}/php:${TAG}
+    container_name: callcenter-php
+    build:
+      context: .
+      target: php
+    volumes:
+      - .:/application
+    networks:
+      - callcenter
+      - a24
+    restart: always
+
+  nginx:
+    image: ${HUB}/nginx:${TAG}
+    container_name: callcenter-nginx
+    build:
+      context: .
+      target: nginx
+    depends_on:
+      - php
+    volumes:
+      - ./public:/application/public
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "9401:80"
+      - "9400:443"
+    networks:
+      - callcenter
+    restart: always
+
+  admin:
+    image: ${HUB}/admin:${TAG}
+    container_name: callcenter-admin
+    env_file: .env
+    build:
+      context: .
+      target: api_platform_admin_development
+    tty: true
+    volumes:
+      - ./admin:/usr/src/admin:rw,cached
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "9405:3000"
+    networks:
+      - callcenter
+    restart: always
+
+  client:
+    image: ${HUB}/client:${TAG}
+    container_name: callcenter-client
+    env_file: .env
+    build:
+      context: .
+      target: api_platform_client_development
+    tty: true
+    volumes:
+      - ./client:/usr/src/client:rw,cached
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "9406:3006"
+    networks:
+      - callcenter
+    restart: always

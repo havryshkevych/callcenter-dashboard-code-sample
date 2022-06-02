@@ -1,0 +1,24 @@
+{
+    "conveyor_copy_task_result": "ok",
+    "attachment_id": "closeChat",
+    "channel": "telegram",
+    "chatId": "b.i295066254_dGVsZWdyYW0=_MjY2NDIwNzQ1+i295066254",
+    "chat_id": "266420745",
+    "class": "text",
+    "clientId": "266420745",
+    "created": 1628249214491,
+    "devId": "7",
+    "devIp": "185.9.43.117",
+    "from": "5SglbhxwZs",
+    "linkId": 51277,
+    "model": {
+        "fromName": "Андрей",
+        "fromPhoto": "",
+        "text": "дратути"
+    },
+    "operator": "Андрей",
+    "packetId": 51277,
+    "procId": "",
+    "sessionId": "hJItC",
+    "text": "Андрей: дратути"
+}

@@ -1,0 +1,39 @@
+{
+    "conveyor_copy_task_result": "ok",
+    "answerParam": "ok",
+    "channel": "telegram",
+    "chatId": "b.i295066254_dGVsZWdyYW0=_MjY2NDIwNzQ1+i295066254",
+    "chatInfo": {
+        "state": "ok",
+        "chatId": "b.i295066254_dGVsZWdyYW0=_MjY2NDIwNzQ1+i295066254",
+        "p2p": "true",
+        "members": [
+            {
+                "id": "b.i295066254_dGVsZWdyYW0=_MjY2NDIwNzQ1",
+                "role": "user"
+            }
+        ],
+        "admins": []
+    },
+    "chat_id": "266420745",
+    "class": "leaveChat",
+    "clientId": "266420745",
+    "created": 1628249892142,
+    "devId": "c",
+    "devIp": "",
+    "from": "sender",
+    "isOperatorsExist": false,
+    "linkId": 51283,
+    "model": {
+        "chatId": "user+i295066254",
+        "actionUser": {
+            "userId": "5SglbhxwZs",
+            "role": "operator",
+            "name": "Андрей",
+            "photo": ""
+        }
+    },
+    "packetId": 51283,
+    "procId": "",
+    "sessionId": "hJItC"
+}
